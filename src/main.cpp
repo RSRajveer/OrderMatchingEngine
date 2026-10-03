@@ -1,6 +1,4 @@
-#include <iostream>
-#include <vector>
-#include <string>
+#include "ome.h"
 
 //Plan is to design an order matching engine
 
@@ -24,109 +22,135 @@
 // Handle order cancellation: locate the order via hash map; remove from its queue; remove the price level if the queue is empty
 // We want to log these events and output them to the user?
 
-enum class OrderType{
-    Buy,
-    Sell
-};
 
-struct Order{
-    OrderType orderType;
-    int quantity;
-    int price;
-};
-
-int main(){
-    Order testOrder;
-
-    std::vector<Order> buyOrders;
-    buyOrders.reserve(100000);  // allocate once upfront
-
-    std::vector<Order> sellOrders;
-    sellOrders.reserve(100000);  // allocate once upfront
-
-    std::string inputString;
-    while (true)
+void OrderMatchingEngine::orderMatchingLogic(Order* user_order)
+{
+    if(user_order->orderType == OrderType::Buy)
     {
-        std::cout << "Enter order type: \n" << std::endl;
-        std::cin >> inputString;
-
-        if (inputString == "q") {
-            break;
-        }
-        if (inputString == "buy") {
-            testOrder.orderType = OrderType::Buy;
-        }
-        else if (inputString == "sell") {
-            testOrder.orderType = OrderType::Sell;
-        }
-        else {
-            std::cout << "Invalid order type. Enter again. \n";
-            continue;
-        }
-
-        std::cout << "Enter stock quantity: \n" << std::endl;
-        std::cin >> testOrder.quantity;
-
-        std::cout << "Enter stock price in pence/cents/ticks: \n" << std::endl;
-        std::cin >> testOrder.price;
-
-        switch (testOrder.orderType){
-            case OrderType::Buy:
+        while(user_order->quantity!= 0)
+        {
+            if(sellOrders.empty())
             {
-                //Let's do order matching now
-                //For a Buy order we don't want to buy anything above the user given price
-                //For a Sell order we don't want to sell anything below the user given price
-
-                while(testOrder.quantity!= 0)
-                {
-                    if(sellOrders.empty())
-                    {
-                        buyOrders.push_back(testOrder);
-                        break;
-                    }
-
-                    auto lowestPriceIt = sellOrders.begin();
-
-                    for(auto it = sellOrders.begin(); it != sellOrders.end(); ++it) //The loop will find the lowest price in the sellOrders queue
-                    {
-                        if(it->price < lowestPriceIt->price)
-                        {
-                            lowestPriceIt = it;
-                        }
-                    }
-
-                    if(testOrder.price >= lowestPriceIt->price)
-                    {
-                        if(lowestPriceIt->quantity <= testOrder.quantity) //Now we check to see if there are enough stocks in the lowest priced sell order to complete the order in one go
-                        {
-                            std::cout << "Buy order executes at price: " << lowestPriceIt->price << " for quantity: " << lowestPriceIt->quantity << std::endl;
-                            testOrder.quantity = testOrder.quantity - lowestPriceIt->quantity; //this gives us how many shares from our order we still have remaining to buy
-                            sellOrders.erase(lowestPriceIt); //since we have bought all the orders being sold at the lowestPrice, we can remove this vector element
-                        }
-                        else if(lowestPriceIt->quantity > testOrder.quantity)
-                        {
-                            std::cout << "Buy order executes at price: " << lowestPriceIt->price << " for quantity: " << testOrder.quantity << std::endl;
-                            lowestPriceIt->quantity = lowestPriceIt->quantity - testOrder.quantity; //there are plenty of stocks remaining after buying at lowestPrice, so update quantity of the price point in the vector
-                            testOrder.quantity = 0;
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        buyOrders.push_back(testOrder);
-                        std::cout << "Buy order at price: " << testOrder.price << " for quantity: " << testOrder.quantity << "set to pending" << std::endl; //resting order
-                        break;
-                    }
-                }
+                buyOrders[user_order->price].push(*user_order);
+                std::cout << "No shares available to buy. Order pending." << std::endl;
                 break;
             }
-            case OrderType::Sell:
-                sellOrders.push_back(testOrder);
-                std::cout << "Sell order at price: " << testOrder.price << " for quantity: " << testOrder.quantity << " set to pending" << std::endl; //resting order
+
+            if(user_order->price >= sellOrders.begin()->first)
+            {
+                Order& lowest = sellOrders.begin()->second.front();
+
+                if(lowest.quantity <= user_order->quantity)
+                {
+                    //sellOrders.erase(lowest.price);
+                    user_order->quantity = user_order->quantity - lowest.quantity;
+                    sellOrders.begin()->second.pop();
+                    if(sellOrders.begin()->second.empty())
+                    {
+                        sellOrders.erase(sellOrders.begin());
+                    }
+                }
+                else
+                {
+                    lowest.quantity = lowest.quantity - user_order->quantity;
+                    user_order->quantity = 0;
+                    std::cout << "Buy order executed." << std::endl;
+                }
+            }
+            else
+            {
+                buyOrders[user_order->price].push(*user_order);
+                std::cout << "No shares available to buy. Order pending." << std::endl;
                 break;
+            }
+
         }
         std::cout << "Buy orders: " << buyOrders.size() << "\n";
         std::cout << "Sell orders: " << sellOrders.size() << "\n";
+    }
+    else if(user_order->orderType == OrderType::Sell)
+    {
+        while(user_order->quantity!= 0)
+        {
+            if(buyOrders.empty())
+            {
+                sellOrders[user_order->price].push(*user_order);
+                std::cout << "No shares available to sell. Sell order pending." << std::endl;
+                break;
+            }
+
+            if(user_order->price <= buyOrders.rbegin()->first)
+            {
+                Order& highest = buyOrders.rbegin()->second.front();
+
+                if(highest.quantity > user_order->quantity)
+                {
+                    highest.quantity = highest.quantity - user_order->quantity;
+                    user_order->quantity = 0;
+                    std::cout << "Sell order executed." << std::endl;
+                }
+                else
+                {
+                    user_order->quantity = user_order->quantity - highest.quantity;
+                    highest.quantity = 0;
+                    buyOrders.rbegin()->second.pop();
+                    if(buyOrders.rbegin()->second.empty())
+                    {
+                        int bestBid = buyOrders.rbegin()->first;
+                        buyOrders.erase(bestBid);
+                    }
+                }
+            }
+            else
+            {
+                sellOrders[user_order->price].push(*user_order);
+                std::cout << "Sell order can't be executed. Order pending." << std::endl;
+                break;
+            }
+        }
+    }
+    return;
+}
+
+int main()
+{
+    std::cout << "ORDER MATCHING ENGINE PROCESS STARTED" << std::endl;
+
+    int order_type = 0;
+    int user_price = 0;
+    int user_quantity = 0;
+
+    while(true)
+    {
+        std::cout << "Enter the order type. 1 to Buy and 2 for sell:" << std::endl;
+        std::cin >> order_type;
+
+        if(order_type == 0)
+        {
+            break;
+        }
+
+        std::cout << "Enter the order price:" << std::endl;
+        std::cin >> user_price;
+
+        std::cout << "Enter the order quantity:";
+        std::cin >> user_quantity;
+
+        Order user_order;
+        if(order_type == 1)
+        {
+            user_order.orderType = OrderType::Buy;
+        }
+        else if(order_type == 2)
+        {
+            user_order.orderType = OrderType::Sell;
+        }
+
+        user_order.price = user_price;
+        user_order.quantity = user_quantity;
+
+        OrderMatchingEngine ome_process;
+        ome_process.orderMatchingLogic(&user_order);
     }
 
     return 0;
