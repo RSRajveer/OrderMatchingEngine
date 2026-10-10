@@ -22,6 +22,9 @@ class OrderMatchingEngine
 
         void orderMatchingLogic(Order* user_order);
 
+        size_t buyLevels()  const { return buyOrders.size(); }
+        size_t sellLevels() const { return sellOrders.size(); }
+
     private:
         std::map<int, std::queue<Order>> buyOrders;
 
