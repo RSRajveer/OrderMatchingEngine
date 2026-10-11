@@ -32,7 +32,7 @@ void OrderMatchingEngine::orderMatchingLogic(Order* user_order)
             if(sellOrders.empty())
             {
                 buyOrders[user_order->price].push(*user_order);
-                std::cout << "No shares available to buy. Order pending." << std::endl;
+                std::cout << "No shares available to buy. Order pending.\n";
                 break;
             }
 
@@ -54,13 +54,13 @@ void OrderMatchingEngine::orderMatchingLogic(Order* user_order)
                 {
                     lowest.quantity = lowest.quantity - user_order->quantity;
                     user_order->quantity = 0;
-                    std::cout << "Buy order executed." << std::endl;
+                    std::cout << "Buy order executed.\n";
                 }
             }
             else
             {
                 buyOrders[user_order->price].push(*user_order);
-                std::cout << "No shares available to buy. Order pending." << std::endl;
+                std::cout << "No shares available to buy. Order pending.\n";
                 break;
             }
 
@@ -75,7 +75,7 @@ void OrderMatchingEngine::orderMatchingLogic(Order* user_order)
             if(buyOrders.empty())
             {
                 sellOrders[user_order->price].push(*user_order);
-                std::cout << "No shares available to sell. Sell order pending." << std::endl;
+                std::cout << "No shares available to sell. Sell order pending.\n";
                 break;
             }
 
@@ -87,7 +87,7 @@ void OrderMatchingEngine::orderMatchingLogic(Order* user_order)
                 {
                     highest.quantity = highest.quantity - user_order->quantity;
                     user_order->quantity = 0;
-                    std::cout << "Sell order executed." << std::endl;
+                    std::cout << "Sell order executed.\n";
                 }
                 else
                 {
@@ -104,7 +104,7 @@ void OrderMatchingEngine::orderMatchingLogic(Order* user_order)
             else
             {
                 sellOrders[user_order->price].push(*user_order);
-                std::cout << "Sell order can't be executed. Order pending." << std::endl;
+                std::cout << "Sell order can't be executed. Order pending.\n";
                 break;
             }
         }

@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <queue>
 
-enum class OrderType{
+enum class OrderType : uint8_t
+{
     Buy,
     Sell
 };
@@ -18,12 +19,12 @@ struct Order{
 class OrderMatchingEngine
 {
     public:
-        OrderMatchingEngine(){};
+        OrderMatchingEngine() = default;
 
         void orderMatchingLogic(Order* user_order);
 
-        size_t buyLevels()  const { return buyOrders.size(); }
-        size_t sellLevels() const { return sellOrders.size(); }
+        [[nodiscard]] size_t  buyLevels()  const { return buyOrders.size(); }
+        [[nodiscard]] size_t  sellLevels() const { return sellOrders.size(); }
 
     private:
         std::map<int, std::queue<Order>> buyOrders;

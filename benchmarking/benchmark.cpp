@@ -30,7 +30,7 @@ static std::vector<Order> generateOrders(int count, int min_price, int max_price
     orders.reserve(count);
     for(int i = 0; i < count; ++i)
     {
-        orders.push_back(Order{ side, qty_dist(rng), price_dist(rng) }); // matches struct field order: orderType, quantity, price
+        orders.push_back(Order{ .orderType = side, .quantity =  qty_dist(rng), .price = price_dist(rng) });
     }
     return orders;
 }
@@ -134,9 +134,9 @@ int main()
 
 
     // Sort so that a percentile is simply the value at that position.
-    std::sort(latencies_ns.begin(), latencies_ns.end());
+    std::ranges::sort(latencies_ns);
     auto pct = [&](double p) {
-        return latencies_ns[static_cast<size_t>(p * (latencies_ns.size() - 1))];
+        return latencies_ns[static_cast<size_t>(p * static_cast<double>(latencies_ns.size() - 1))];
     };
 
     std::cout << "p50: " << pct(0.50) << " ns\n";

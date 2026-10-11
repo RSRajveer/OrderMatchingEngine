@@ -2,7 +2,7 @@
 
 int main()
 {
-    std::cout << "ORDER MATCHING ENGINE PROCESS STARTED" << std::endl;
+    std::cout << "ORDER MATCHING ENGINE PROCESS STARTED\n";
 
     int order_type = 0;
     int user_price = 0;
@@ -10,7 +10,7 @@ int main()
 
     while(true)
     {
-        std::cout << "Enter the order type. 1 to Buy and 2 for sell:" << std::endl;
+        std::cout << "Enter the order type. 1 to Buy and 2 for sell:\n";
         std::cin >> order_type;
 
         if(order_type == 0)
@@ -18,7 +18,7 @@ int main()
             break;
         }
 
-        std::cout << "Enter the order price:" << std::endl;
+        std::cout << "Enter the order price:\n";
         std::cin >> user_price;
 
         std::cout << "Enter the order quantity:";
