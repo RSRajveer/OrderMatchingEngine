@@ -12,10 +12,16 @@ A limit-order matching engine in C++, built in stages to explore data-structure 
 
 Hardware: Intel Xeon Gold 5218 @ 2.30 GHz, g++ (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5), -std=c++23 -O2
 
-Build:
+Build and run:
 
 ```
 g++ -std=c++23 -O2 -Wall -Wextra -I. src/ome.cpp benchmarking/benchmark.cpp -o benchmark
+```
+=======
+```
+cmake -B build
+cmake --build build
+./build/benchmark
 ```
 
 Workload: N = 100,000; sell prices 100-200, qty 1-120; buy price 200, qty 1-100; seed 42.
